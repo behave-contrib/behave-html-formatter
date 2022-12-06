@@ -18,7 +18,9 @@ jobs:
       fail-fast: false
       matrix:
         env:
+        - black
         - flake8
+        - isort
         - pylint
         - readme
     steps:
