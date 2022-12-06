@@ -21,6 +21,7 @@ jobs:
         - black
         - flake8
         - isort
+        - minify
         - pylint
         - readme
     steps:
