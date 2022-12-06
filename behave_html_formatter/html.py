@@ -28,18 +28,15 @@ TODO:
   * Even empty embed elements are contained ?!?
 """
 
+import re
 import xml.etree.ElementTree as ET
-
 from collections import Counter
 from os.path import abspath
 from pathlib import Path
 from sys import version
-
 from xml.dom import minidom
-import re
 
 import six
-
 from behave.formatter.base import Formatter
 
 
