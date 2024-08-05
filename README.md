@@ -10,6 +10,15 @@ following content:
 html = behave_html_formatter:HTMLFormatter
 ```
 
+or the following content to generate a report with more summary information:
+
+```ini
+# -- FILE: behave.ini
+# Define ALIAS for HtmlFormatter.
+[behave.formatters]
+html = behave_html_formatter:HTMLFormatterFullSummary
+```
+
 and then use it by running behave with `-f`/`--format` parameter, e.g.
 
 ```console

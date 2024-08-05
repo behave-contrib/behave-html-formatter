@@ -38,6 +38,7 @@ from xml.dom import minidom
 
 import six
 from behave.formatter.base import Formatter
+from behave.model import ScenarioOutline
 
 
 def _valid_XML_char_ordinal(i):
@@ -106,8 +107,11 @@ class HTMLFormatter(Formatter):
     description = "Very basic HTML formatter"
     title = "Behave Test Report"
 
-    def __init__(self, stream, config):
+    def __init__(self, stream, config, full_summary = False):
         super().__init__(stream, config)
+
+        # Whether generate the full summary in the Test Report
+        self.full_summary = full_summary
 
         # -- XXX-JE-PREPARED-BUT-DISABLED:
         # XXX Seldom changed value.
@@ -487,7 +491,13 @@ class HTMLFormatter(Formatter):
         # Filling in summary details
         result = []
         statuses = [x.status.name for x in self.all_features]
-        status_counter = Counter(statuses)
+        if self.full_summary:
+            status_counter = {'passed': 0, 'failed': 0, 'skipped': 0}
+            status_counter["passed"] = Counter(statuses)["passed"]
+            status_counter["failed"] = Counter(statuses)["failed"]
+            status_counter["skipped"] = Counter(statuses)["skipped"]
+        else:
+            status_counter = Counter(statuses)
         for k in status_counter:
             result.append(f"{k}: {status_counter[k]}")
         self.current_feature_totals.text = "Features: " + ", ".join(result)
@@ -496,9 +506,21 @@ class HTMLFormatter(Formatter):
         scenarios_list = [x.scenarios for x in self.all_features]
         scenarios = []
         if len(scenarios_list) > 0:
-            scenarios = [x for subl in scenarios_list for x in subl]
+            for subl in scenarios_list:
+                for x in subl:
+                    if type(x) is ScenarioOutline:
+                        for s in x.scenarios:
+                            scenarios.append(s)
+                    else:
+                        scenarios.append(x)
         statuses = [x.status.name for x in scenarios]
-        status_counter = Counter(statuses)
+        if self.full_summary:
+            status_counter = {'passed': 0, 'failed': 0, 'skipped': 0}
+            status_counter["passed"] = Counter(statuses)["passed"]
+            status_counter["failed"] = Counter(statuses)["failed"]
+            status_counter["skipped"] = Counter(statuses)["skipped"]
+        else:
+            status_counter = Counter(statuses)
         for k in status_counter:
             result.append(f"{k}: {status_counter[k]}")
         self.scenario_totals.text = "Scenarios: " + ", ".join(result)
@@ -509,7 +531,14 @@ class HTMLFormatter(Formatter):
         if step_list:
             steps = [x for subl in step_list for x in subl]
         statuses = [x.status.name for x in steps]
-        status_counter = Counter(statuses)
+        if self.full_summary:
+            status_counter = {'passed': 0, 'failed': 0, 'skipped': 0, 'undefined': 0}
+            status_counter["passed"] = Counter(statuses)["passed"]
+            status_counter["failed"] = Counter(statuses)["failed"]
+            status_counter["skipped"] = Counter(statuses)["skipped"]
+            status_counter["undefined"] = Counter(statuses)["undefined"]
+        else:
+            status_counter = Counter(statuses)
         for k in status_counter:
             result.append(f"{k}: {status_counter[k]}")
         self.step_totals.text = "Steps: " + ", ".join(result)
@@ -518,3 +547,8 @@ class HTMLFormatter(Formatter):
         if len(self.all_features) > 0:
             self.stream.write("<!DOCTYPE HTML>")
             self.stream.write(ET_tostring(self.html, pretty_print=False))
+
+
+class HTMLFormatterFullSummary(HTMLFormatter):
+    def __init__(self, stream, config):
+        super().__init__(stream, config, True)
