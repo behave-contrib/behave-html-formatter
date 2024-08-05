@@ -38,6 +38,7 @@ from xml.dom import minidom
 
 import six
 from behave.formatter.base import Formatter
+from behave.model import ScenarioOutline
 
 
 def _valid_XML_char_ordinal(i):
@@ -496,7 +497,13 @@ class HTMLFormatter(Formatter):
         scenarios_list = [x.scenarios for x in self.all_features]
         scenarios = []
         if len(scenarios_list) > 0:
-            scenarios = [x for subl in scenarios_list for x in subl]
+            for subl in scenarios_list:
+                for x in subl:
+                    if type(x) is ScenarioOutline:
+                        for s in x.scenarios:
+                            scenarios.append(s)
+                    else:
+                        scenarios.append(x)
         statuses = [x.status.name for x in scenarios]
         status_counter = Counter(statuses)
         for k in status_counter:

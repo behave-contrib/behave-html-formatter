@@ -12,7 +12,7 @@ def read_file(filename):
 
 setup(
     name="behave-html-formatter",
-    version="0.9.10",
+    version="0.9.11",
     author="Petr Schindler",
     author_email="pschindl@redhat.com",
     description="HTML formatter for Behave",
